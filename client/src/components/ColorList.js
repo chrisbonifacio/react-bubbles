@@ -30,6 +30,7 @@ const ColorList = ({ colors, updateColors }) => {
       .catch(err => {
         console.log(err)
       })
+    setEditing(false)
   }
 
   const deleteColor = color => {
@@ -37,6 +38,7 @@ const ColorList = ({ colors, updateColors }) => {
     axiosWithAuth()
       .delete(`/colors/${color.id}`)
       .then(res => {
+        setEditing(false)
         console.log(res)
       })
       .catch(err => {
