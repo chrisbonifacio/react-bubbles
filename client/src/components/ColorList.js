@@ -7,7 +7,6 @@ const initialColor = {
 }
 
 const ColorList = ({ colors, updateColors }) => {
-  console.log("ColorList: colors:", colors)
   const [editing, setEditing] = useState(false)
   const [colorToEdit, setColorToEdit] = useState(initialColor)
 
@@ -18,13 +17,14 @@ const ColorList = ({ colors, updateColors }) => {
 
   const saveEdit = e => {
     e.preventDefault()
+    const color = colors.find(item => colorToEdit.code.hex === item.code.hex)
     // Make a put request to save your updated color
     // think about where will you get the id from...
     // where is it saved right now?
     axiosWithAuth()
-      .put(`/colors`)
+      .put(`/colors/${color}`, colorToEdit)
       .then(res => {
-        console.log(res)
+        updateColors([...colors, res.data])
       })
       .catch(err => {
         console.log(err)
@@ -33,26 +33,41 @@ const ColorList = ({ colors, updateColors }) => {
 
   const deleteColor = color => {
     // make a delete request to delete this color
+    axiosWithAuth()
+      .delete(`/colors/${color.id}`)
+      .then(res => {
+        console.log(res)
+      })
+      .catch(err => {
+        console.log(err)
+      })
+    updateColors(
+      colors.filter(item => {
+        return item.id !== color.id
+      })
+    )
   }
 
   return (
     <div className="colors-wrap">
       <p>colors</p>
       <ul>
-        {colors.map(color => (
-          <li key={color.color} onClick={() => editColor(color)}>
-            <span>
-              <span className="delete" onClick={() => deleteColor(color)}>
-                x
-              </span>{" "}
-              {color.color}
-            </span>
-            <div
-              className="color-box"
-              style={{ backgroundColor: color.code.hex }}
-            />
-          </li>
-        ))}
+        {colors.map(color => {
+          return (
+            <li key={color.color} onClick={() => editColor(color)}>
+              <span>
+                <span className="delete" onClick={() => deleteColor(color)}>
+                  x
+                </span>
+                {color.color}
+              </span>
+              <div
+                className="color-box"
+                style={{ backgroundColor: color.code.hex }}
+              />
+            </li>
+          )
+        })}
       </ul>
       {editing && (
         <form onSubmit={saveEdit}>
